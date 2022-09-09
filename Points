@@ -1,0 +1,324 @@
+
+iW-PRGST-QR-01-R1.0-REL1.1_Rugged_Telematics_Device_ME_EMBEDDED_REL2.0
+
+IBM Cloud Credential Details : 
+	Org Id : 3di6ym
+	Device ID Device001
+	Device Type : OBDDevice
+	Authentication Token : iWavesys123
+
+Tranfer files using UUU Tool:
+	root@imx6ull-iwg18m-sm:~# mount /dev/mmcblk1p1 /mnt
+	root@imx6ull-iwg18m-sm:~# cp /mnt/Dataset_7B_PTO.sh.zip .
+	root@imx6ull-iwg18m-sm:~# umount /mnt
+
+Find command : 
+	find . -name *.dtb
+
+
+Disable Accelorometer wakeup : 
+	echo disabled > /sys/bus/i2c/devices/i2c-1/1-006a/power/wakeup
+
+root@imx6ull-iwg18m-sm:~# cat /sys/bus/i2c/devices/i2c-1/1-006a/power/wakeup
+
+Check size of the file : 
+	ls -lrth <Filename>
+
+Split file :
+	split -b 150MB <filename>
+
+To check Free Disk space : 
+	df -h --total
+
+CPU Utilization : 
+	free -h &
+
+Total RAM : 
+	sahana@sahana-OptiPlex-7060:~$ cat /proc/meminfo 
+	MemTotal:       16184156 kB     //RAM
+	MemFree:          310540 kB
+	MemAvailable:    8096984 kB     //RAM
+
+ACC Wakeup : 
+	cat /sys/bus/i2c/devices/i2c-1/1-006a/power/wakeup
+		
+	i2cset -f -y 1 0x6A 0x0D 0x00
+	i2cset -f -y 1 0x6A 0x58 0x8e
+
+Timer wakeup : echo +20 > /sys/class/rtc/rtc0/wakealarm
+
+Wakeup File : 
+	#define TIMER_WAKEUPALARM_FILE_NAME : /sys/class/rtc/rtc0/wakealarm
+	#define ACC_WAKEUP_FILE_NAME : /sys/bus/i2c/devices/i2c-1/1-006a/power/wakeup
+	#define CAN0_WAKEUP_FILE_NAME : /sys/devices/soc0/soc/2000000.aips-bus/2090000.flexcan/power/wakeup
+	#define CAN1_WAKEUP_FILE_NAME : /sys/devices/soc0/soc/2000000.aips-bus/2094000.flexcan/power/wakeup
+	#define IGN_WAKEUP_FILE_NAME : /sys/devices/soc0/gpio-keys/power/wakeup"
+
+Push device to sleep : 
+	echo mem > /sys/power/state
+
+Flshing UUU-Tool without removing battery : 
+	i2c dev 1
+	i2c probe
+	i2c mw 0x6b 0x07 0x64
+
+To make CAN interface UP :
+	ip link set can0 up type can bitrate 250000  
+	ip link set can1 up type can bitrate 250000
+
+	ip link set can0 up type can bitrate 500000
+	
+	ip link set can0 up type can bitrate 1000000
+
+CAN FD :
+cansend can2 123##1401234567812340040123456781234004012345678123400401234567812340040123456781234004012345678123400401234567812340040123456781234 
+       
+	insmod /iwtest/kernel-module/tcan4x5x.ko
+	ip link set can2 up type can bitrate 500000 dbitrate 5000000 fd on
+	ip link set can2 up type can bitrate 500000 dbitrate 1000000 fd on
+	
+CAN Deinit : 
+	 ifconfig can0 down
+
+Shipment mode Enable in battery : 
+	i2cset -f -y 1 0x6b 0x07 0x6c
+
+To make can_FD (can2) UP:
+	Enable canFD : insmod /iwtest/kernel-module/tcan4x5x.ko
+	ip link set can2 up type can bitrate 250000
+
+cansend can0 123#AABBCC
+
+29-bit CAN request and Response ID : 
+	Request : 18DA18F1, 18DAF110
+	Response : 18DAF118, 18DA10F1
+
+	Frame : cansend can0 18DAF118#0641008818001000
+
+Yocto_Build Commands : 
+	bitbake core-image-minimal -c do_populate_sdk
+
+a) To Clean : 
+	bitbake -c cleanall gpsd
+	bitbake -c cleanall core-image-minimal	
+
+Script Files : (PRGST)
+	wget -O iwtest.zip https://github.com/sahana250/Test/blob/master/iwtest.zip?raw=true
+
+UUU  Tool Flashing command : 
+	> sudo ./uuu boot.uuu 
+
+Update Quectel Firmware : 
+	~/QFirehose_linux# ./QFirehose -f ../EM20GRAR01A04V01M4G
+
+Ethernet : 
+	ifconfig eth0 192.168.1.10 up
+	scp test_file.txt sahana@192.168.1.12:/tmp/
+
+4G routing to Wifi : 
+	Make ppp0 up
+	connect board wifi to laptop/mobile
+	open command prompt in lap
+	ping 8.8.8.8 (it ping only 4 times)
+	ping -n 10 8.8.8.8 (10 times)
+
+USB Detection : (Pendrive)
+	df -h
+	ls /run/media/sda1/
+	cp /run/media/sda1/tek00030.png .
+	echo 1 > /run/media/sda1/prgst_test.txt
+	umount /run/media/sda1/	
+
+Bluetooth :
+	bluetoothctl
+	show 	   // show all the devices
+	scan on    // Scan new deivces
+	scan off
+	pair <ip address> // D4:63:DE:A4:64:63 vivo Y33s
+	quit
+	
+Bluetooth File Transfer : (APP name : Bluetooth File Transfer)
+	obexftp -b D4:63:DE:A4:64:63 -p can_init.sh
+
+To change Bluetooth name of deivce : 
+	system-alias <PRGST_R1.0>
+
+[App Name : Serial Bluetooth Terminal ]
+Send data to mobile : echo Hiii > /dev/rfcomm0
+Receive data from Mobile : cat /dev/rfcomm0
+
+WiFI : 
+	App Name : Termux
+
+SSH : 
+1) Through Ethernet : 	
+	ssh sahana@192.168.1.12
+	scp -r Downloads/Binaries.zip root@192.168.1.10:/home/root
+
+2) Through Wifi : 
+	ssh sahana@192.168.1.12
+	
+
+RS232 : 
+	echo DATA > /dev/ttymxc5   // OBD_Device
+	sudo su	
+	cat /dev/ttyUSB#	// In Host PC
+
+stty -F /dev/ttymxc5 -echo -onlcr
+
+LED ON : 
+	echo 73 > /sys/class/gpio/export
+	echo out > /sys/class/gpio/gpio73/direction
+	ON :  echo 1 > /sys/class/gpio/gpio73/value	
+	OFF : echo 0 > /sys/class/gpio/gpio73/value
+
+Install azure iot hub node :(Node-RED) 
+	> npm install -g node-red-contrib-azure-iot-hub
+
+grep -nir azure*
+
+Disable NTP : 	
+	systemctl disable ntpd
+	systemctl deamon-reload
+
+Disable Application : 
+	> systemctl disable node-red-appn.service
+	> systemctl daemon-reload
+
+Enable Application : 
+	> systemctl enable node-red-appn.service
+
+	> systemctl daemon-reload
+
+	> Reboot
+
+	> systemctl start node-red-appn.service
+
+	> systemctl stop node-red-appn.service
+
+Disable Bluetooth : 
+	> systemctl disable /lib/systemd/system/restart_ble.service 
+
+	> systemctl disable /lib/systemd/system/ble.service
+
+	> systemctl daemon-reload
+
+Enable Bluetooth : 
+	> systemctl enable /lib/systemd/system/restart_ble.service 
+
+	> systemctl enable /lib/systemd/system/ble.service
+
+	> systemctl daemon-reload
+	
+	> Reboot
+
+Connect WiFi Station Mode Manually : 
+	> killall -9 wpa_supplicant
+
+	> wpa_supplicant -d -Dnl80211 -c /etc/wpa_supplicant.conf -i wlan0 &
+
+	> udhcpc -i wlan0
+
+Rename Wifi name :
+	> vi /etc/hostapd.conf
+	Search for /ssid
+
+Wifi down : 
+	ifconfig wlan0 down
+	 
+Walgrind : 
+	--> valgrind --leak-check=full ./fh-eld-can-service
+
+To compress File : 
+	tar -cvjf Application.tar.bz2 Application/
+
+Change permission to all sub directory : 
+	--> sudo chmod -R g+rw *
+
+Link : 
+1 ) http://obdcon.sourceforge.net/2010/06/obd-ii-pids/
+
+Can Intialization : 
+	cansend can0 7E8#0341000400000000 
+
+CAN Response Frame : 
+	7E8#03410C3400000000
+        7DF#0201000000000000 
+Here , 
+	03 = Length of the data
+	41 = Mode
+	0C = PIDs (RPM)
+	34 = 1st Byte Data (A)
+	00 = 2nd Byte Data (B)
+
+..................................................................................................................................................................
+
+cansend can0 7E8#0341246900000000
+cansend can0 7E8#0341250000000000
+cansend can0 7E8#0341248999780000
+
+((A*256)+B)*2/65535 or
+((A*256)+B)/32768
+((C*256)+D)*8/65535 or
+((C*256)+D)/8192
+
+killall -9 iWaveOBD2FW
+
+killall -9 6200
+
+PRFYB Board Number : 3901315
+
+systemctl disable iWave_APP
+
+Copy file using SSH : 
+scp -r Carbuddy_new/ sahana@192.168.2.239:/home/sahana/projects/OBDII/Sahana/Android_Studio
+
+$ scp -r /path/to/local/source user@ssh.example.com:/path/to/remote/destination 
+
+ <!--<com.google.android.material.textfield.TextInputLayout -->
+style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+
+scp -r Firmware_1.8.tar.bz2 akshay@192.168.1.139:/tmp
+
+wget -O Application.tar.bz2 https://github.com/sahana250/Test/blob/master/Application.tar.bz2?raw=true
+...................................................................................................
+
+cansend can0 7E8#04410C0000000000 --> Response
+
+cansend can0 7E0#02010C0000000000 --> Request
+
+Response messages for CAN : (11-Bit)
+
+cansend can0 7E8#04410c3f23000000
+cansend can0 7E8#04410c58d5000000
+cansend can0 7E8#04410c9108000000
+cansend can0 7E8#04410ca83a000000
+cansend can0 7E8#04410ce8ee000000
+cansend can0 7E8#04410cd2ac000000
+cansend can0 7E8#04410cd29c000000
+
+29 Bit request-response : 
+
+cansend can0 18DB33F1#0201000000000000  
+	can0  18DB33F1   [8]  02 01 00 00 00 00 00 00
+root@imx6ull-iwg18m-sm:~#   can0  18DAF110   [8]  06 41 00 BE 1B 30 13 00
+   	can0  18DAF118   [8]  06 41 00 88 18 00 10 00
+   	can0  18DAF128   [8]  06 41 00 80 08 00 10 00
+root@imx6ull-iwg18m-sm:~# cansend can0 18DB33F1#02010C0000000000
+   	can0  18DB33F1   [8]  02 01 0C 00 00 00 00 00
+root@imx6ull-iwg18m-sm:~#   can0  18DAF110   [8]  04 41 0C D5 DC 00 00 00
+   	can0  18DAF118   [8]  04 41 0C D5 DC 00 00 00
+
+ip link set can2 up type can bitrate 500000 dbitrate 5000000 fd on
+
+cansend can2 123##11122334455112233445566112233445566
+
+cansend can2 123##1401234567812340040123456781234004012345678123400401234567812340040123456781234004012345678123400401234567812340040123456781234
+
+
+7E1#02010C0000000000
+
+
+
+
+
