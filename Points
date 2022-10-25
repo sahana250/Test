@@ -52,7 +52,7 @@ Wakeup File :
 	#define ACC_WAKEUP_FILE_NAME : /sys/bus/i2c/devices/i2c-1/1-006a/power/wakeup
 	#define CAN0_WAKEUP_FILE_NAME : /sys/devices/soc0/soc/2000000.aips-bus/2090000.flexcan/power/wakeup
 	#define CAN1_WAKEUP_FILE_NAME : /sys/devices/soc0/soc/2000000.aips-bus/2094000.flexcan/power/wakeup
-	#define IGN_WAKEUP_FILE_NAME : /sys/devices/soc0/gpio-keys/power/wakeup"
+	#define IGN_WAKEUP_FILE_NAME : /sys/devices/soc0/gpio-keys/power/wakeup
 
 Push device to sleep : 
 	echo mem > /sys/power/state
@@ -95,6 +95,10 @@ cansend can0 123#AABBCC
 
 	Frame : cansend can0 18DAF118#0641008818001000
 
+Secure Element : 
+	i2cdetect -y 1
+	./ncj38a_IMX6_usecases.elf 
+
 Yocto_Build Commands : 
 	bitbake core-image-minimal -c do_populate_sdk
 
@@ -114,6 +118,9 @@ Update Quectel Firmware :
 Ethernet : 
 	ifconfig eth0 192.168.1.10 up
 	scp test_file.txt sahana@192.168.1.12:/tmp/
+	
+Change MAC Address of Ethernet : 
+	ifconfig eth0 hw ether 8c:ec:4b:cb:17:fd
 
 4G routing to Wifi : 
 	Make ppp0 up
@@ -126,13 +133,21 @@ USB Detection : (Pendrive)
 	df -h
 	ls /run/media/sda1/
 	cp /run/media/sda1/tek00030.png .
-	echo 1 > /run/media/sda1/prgst_test.txt
+	echo abcdefg > /run/media/sda1/prgst_test.txt
 	umount /run/media/sda1/	
+
+ETHERNET : 
+set mac address : 
+	ethtool -s eth0 autoneg on speed 10 duplex full    // 10mbps
+	ifconfig eth0 hw ether 36:FB:4F:6A:89:6D
+	connect device ethernet cable to 'A' port (iwave netwrk)
+	ping 192.168.2.254 (iwave ethernet IP Address)
+	ping 8.8.8.8 
 
 Bluetooth :
 	bluetoothctl
 	show 	   // show all the devices
-	scan on    // Scan new deivces
+	scan on    // Scan new devices
 	scan off
 	pair <ip address> // D4:63:DE:A4:64:63 vivo Y33s
 	quit
@@ -146,6 +161,15 @@ To change Bluetooth name of deivce :
 [App Name : Serial Bluetooth Terminal ]
 Send data to mobile : echo Hiii > /dev/rfcomm0
 Receive data from Mobile : cat /dev/rfcomm0
+
+GPS Fix using SIM : 
+	AT+QGPSCFG="plane",0 
+
+	AT+QGPSSUPLURL="supl.google.com:7276" 
+
+	AT+QGPSCFG="lbsapn",16,1,"vzwinternet" 
+
+	AT+QGPS=2 
 
 WiFI : 
 	App Name : Termux
@@ -281,6 +305,8 @@ style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
 scp -r Firmware_1.8.tar.bz2 akshay@192.168.1.139:/tmp
 
 wget -O Application.tar.bz2 https://github.com/sahana250/Test/blob/master/Application.tar.bz2?raw=true
+
+wget -O iwtest.zip https://github.com/sahana250/Test/blob/master/iwtest.zip?raw=true
 ...................................................................................................
 
 cansend can0 7E8#04410C0000000000 --> Response
@@ -317,6 +343,60 @@ cansend can2 123##14012345678123400401234567812340040123456781234004012345678123
 
 
 7E1#02010C0000000000
+
+.................................................................................
+SIM Number :
+
+7204867614
+
+8991000900613523433F -> 9108242527
+89914509009133571961 -> 8296552380 
+
+.................................................................................
+CAN FD Working boards : 
+1) R3.2 OK22-0600028
+2) R3.2 PO20-3200007
+
+..................................................................................
+Raspberrypi Connection : 
+1) https://projects.raspberrypi.org/en/projects/raspberry-pi-setting-up/1
+
+ifconfig can2 txqueuelen 90000
+
+
+i2cset -f -y 0  0x76 0xb0 0x01 0x04 0x80 0x14 0x00 0x00 0x00 0x00
+
+
+i2ctransfer -fy 0 w10@0x76 0xB0 0x01 0x03 0x01 0x80 0x14 0x0 0x0 0x0 0x0
+
+============================================================================================================
+Danitech : 
+After Sleep-Wakeup modem issue : 
+Board Number : 15
+
+=================================================================================================================
+MCU TEST APP : 
+ignition wakeup : 
+11 - wrking (Fresh boot) -> Norml sleep : timer, ign, accel
+14 - not wrking (After Accelerometer wakeup)
+
+Accelerometer Wakeup : 
+17 - wrking
+0 - not wrking
+
+i2ctransfer -fy 0 w10@0x76 0xB0 0x01 0x02 0x04 0x20 0xa 0x0 0x0 0x0 0x0
+
+i2ctransfer -fy 0 w10@0x76 0xB0 0x01 0x02 0x04 0x20 0x0 0x0 0x0 0x0 0x0     //Ignition
+
+i2ctransfer -fy 0 w10@0x76 0xB0 0x01 0x02 0x04 0x40 0x0 0x0 0x0 0x0 0x0     // Accelerometer
+
+**************************************
+Unstable Battery : 
+3, 7, 14, 25, 28, 31, 35, 40
+
+
+ cangen can2 -b -g 10 -L 64 -I 113 -n 1000
+
 
 
 
